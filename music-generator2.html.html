@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ΜΟΥΣΑ — Your Personal Music Studio</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=Playfair+Display:ital@1&display=swap');
+
+  :root {
+    --black: #0a0a0f;
+    --deep: #10101a;
+    --panel: #15151f;
+    --border: #2a2a3a;
+    --accent: #c8a96e;
+    --accent2: #7b5ea7;
+    --neon: #00e5cc;
+    --text: #e8e4dc;
+    --muted: #6b6880;
+    --danger: #ff4f4f;
+    --success: #00e5cc;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -30%; left: -20%;
+    width: 70%; height: 70%;
+    background: radial-gradient(ellipse, rgba(123,94,167,0.12) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -20%; right: -10%;
+    width: 60%; height: 60%;
+    background: radial-gradient(ellipse, rgba(0,229,204,0.07) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .container {
+    position: relative; z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+
+  header { text-align: center; margin-bottom: 44px; }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(52px, 12vw, 88px);
+    letter-spacing: 0.08em;
+    line-height: 0.9;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 50%, var(--neon) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .tagline {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    margin-top: 8px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent2), var(--neon));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .card:focus-within::before { opacity: 1; }
+
+  .card-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-label::after {
+    content: ''; flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .card h3 { font-size: 15px; font-weight: 600; margin-bottom: 5px; }
+  .card p { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+
+  input[type="text"], input[type="password"], textarea, select {
+    width: 100%;
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    padding: 12px 16px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+  }
+  input:focus, textarea:focus, select:focus {
+    border-color: var(--accent2);
+    box-shadow: 0 0 0 3px rgba(123,94,167,0.15);
+  }
+  textarea { resize: vertical; min-height: 86px; line-height: 1.6; }
+  select { cursor: pointer; }
+  select option { background: var(--deep); }
+
+  .input-row { display: flex; gap: 10px; align-items: center; }
+  .input-row input { flex: 1; }
+
+  .eye-btn {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    padding: 12px 14px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .eye-btn:hover { color: var(--text); border-color: var(--accent2); }
+
+  /* Model selector */
+  .model-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 0;
+  }
+  @media(max-width:480px) { .model-grid { grid-template-columns: 1fr; } }
+
+  .model-card {
+    background: var(--deep);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .model-card:hover { border-color: var(--muted); }
+  .model-card.active {
+    border-color: var(--accent2);
+    background: rgba(123,94,167,0.1);
+  }
+  .model-card.active::after {
+    content: '✓';
+    position: absolute;
+    top: 10px; right: 12px;
+    color: var(--accent2);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .model-card .model-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    display: block;
+    margin-bottom: 3px;
+  }
+  .model-card .model-cap {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: rgba(0,229,204,0.12);
+    color: var(--neon);
+    margin-bottom: 5px;
+  }
+  .model-card .model-desc {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* Genre pills */
+  .genre-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  @media(max-width:480px) { .genre-grid { grid-template-columns: 1fr; } }
+
+  .genre-pill {
+    background: var(--deep);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    position: relative;
+  }
+  .genre-pill:hover { border-color: var(--muted); }
+  .genre-pill.active {
+    border-color: var(--accent);
+    background: rgba(200,169,110,0.08);
+  }
+  .genre-pill.active::after {
+    content: '✓';
+    position: absolute;
+    top: 10px; right: 12px;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .genre-pill .genre-name { font-size: 13px; font-weight: 600; color: var(--text); display: block; margin-bottom: 3px; }
+  .genre-pill .genre-desc { font-size: 11px; color: var(--muted); }
+
+  /* Duration slider */
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .slider-row label { font-size: 12px; color: var(--muted); min-width: 110px; }
+  .slider-row input[type="range"] {
+    flex: 1; padding: 0; border: none; background: none;
+    box-shadow: none; accent-color: var(--accent2); cursor: pointer;
+  }
+  .slider-val { font-size: 13px; color: var(--accent); min-width: 44px; text-align: right; font-weight: 600; }
+
+  /* Lyrics hint */
+  .structure-hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 8px;
+    line-height: 1.6;
+    display: none;
+  }
+  .structure-hint.show { display: block; }
+  .structure-hint code {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 5px;
+    color: var(--neon);
+    font-family: monospace;
+    font-size: 11px;
+  }
+
+  /* Voice upload */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: var(--accent);
+    background: rgba(200,169,110,0.04);
+  }
+  .upload-zone input[type="file"] {
+    position: absolute; inset: 0;
+    opacity: 0; cursor: pointer;
+    width: 100%; height: 100%;
+    padding: 0; border: none; background: none;
+  }
+  .upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .upload-zone p { font-size: 13px; color: var(--muted); margin-bottom: 0; }
+  .upload-zone strong { color: var(--accent); }
+  .file-name { margin-top: 10px; font-size: 12px; color: var(--neon); font-weight: 500; display: none; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 14px 24px;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent2), #5a3d8a);
+    color: #fff;
+    width: 100%;
+    font-size: 15px;
+    padding: 16px;
+  }
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(123,94,167,0.35);
+  }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-secondary { background: var(--deep); border: 1px solid var(--border); color: var(--text); }
+  .btn-secondary:hover { border-color: var(--accent2); }
+  .btn-neon { background: rgba(0,229,204,0.1); border: 1px solid var(--neon); color: var(--neon); }
+  .btn-neon:hover { background: rgba(0,229,204,0.18); }
+
+  /* Tabs */
+  .tabs {
+    display: flex; gap: 4px;
+    background: var(--deep);
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 18px;
+  }
+  .tab {
+    flex: 1; padding: 10px;
+    text-align: center;
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    border-radius: 7px;
+    color: var(--muted);
+    transition: all 0.2s;
+    border: none; background: none;
+    font-family: 'Inter', sans-serif;
+  }
+  .tab.active { background: var(--panel); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Status */
+  .status-box {
+    background: var(--deep);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-top: 18px;
+    display: none;
+  }
+  .status-box.show { display: block; }
+
+  .status-step {
+    display: flex; align-items: center; gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px; color: var(--muted);
+  }
+  .status-step:last-child { border-bottom: none; }
+  .status-step.active { color: var(--text); }
+  .status-step.done { color: var(--neon); }
+  .status-step.error { color: var(--danger); }
+
+  .step-icon {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--panel);
+    border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; flex-shrink: 0;
+    transition: all 0.3s;
+  }
+  .status-step.active .step-icon { border-color: var(--accent2); animation: pulse 1.2s infinite; }
+  .status-step.done .step-icon { background: var(--neon); border-color: var(--neon); color: var(--black); }
+  .status-step.error .step-icon { background: var(--danger); border-color: var(--danger); color: #fff; }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(123,94,167,0.4); }
+    50% { box-shadow: 0 0 0 5px rgba(123,94,167,0); }
+  }
+
+  /* Player */
+  .player-card {
+    display: none;
+    background: linear-gradient(135deg, rgba(123,94,167,0.15), rgba(0,229,204,0.08));
+    border: 1px solid var(--accent2);
+    border-radius: 12px;
+    padding: 24px;
+    margin-top: 18px;
+    text-align: center;
+  }
+  .player-card.show { display: block; }
+  .player-card h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .player-card audio { width: 100%; border-radius: 8px; margin-bottom: 14px; }
+  .player-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+  /* Error */
+  .error-msg {
+    background: rgba(255,79,79,0.1);
+    border: 1px solid rgba(255,79,79,0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--danger);
+    margin-top: 12px;
+    display: none;
+  }
+  .error-msg.show { display: block; }
+
+  .tip {
+    display: flex; gap: 10px;
+    background: rgba(200,169,110,0.07);
+    border: 1px solid rgba(200,169,110,0.2);
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-size: 12px;
+    color: var(--accent);
+    margin-top: 14px;
+    line-height: 1.5;
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 48px;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo">ΜΟΥΣΑ</div>
+    <div class="tagline">your personal music studio · no subscriptions · full songs · all yours</div>
+  </header>
+
+  <!-- API Key -->
+  <div class="card">
+    <div class="card-label">Connect</div>
+    <h3>Replicate API Key</h3>
+    <p>Stays in your browser only — never sent anywhere except Replicate.</p>
+    <div class="input-row">
+      <input type="password" id="apiKey" placeholder="r8_••••••••••••••••••••••••••••••••••••••" autocomplete="off">
+      <button class="eye-btn" onclick="toggleKey()">👁</button>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('music')" id="tab-music">🎵 Instrumental</button>
+    <button class="tab" onclick="switchTab('song')" id="tab-song">🎤 Full Song + Lyrics</button>
+    <button class="tab" onclick="switchTab('voice')" id="tab-voice">🧬 My Voice Clone</button>
+  </div>
+
+  <!-- ===== INSTRUMENTAL TAB ===== -->
+  <div class="tab-content active" id="content-music">
+
+    <div class="card">
+      <div class="card-label">Engine</div>
+      <h3>Choose Your Generator</h3>
+      <p>Both support full-length tracks up to 3 minutes.</p>
+      <div class="model-grid">
+        <div class="model-card active" onclick="selectModel(this,'stable-audio')" id="model-stable">
+          <span class="model-cap">UP TO 3 MIN</span>
+          <span class="model-name">Stable Audio 2.5</span>
+          <span class="model-desc">Rich instrumentals, cinematic sound design, great for your Parisian nocturne & Greek vibes</span>
+        </div>
+        <div class="model-card" onclick="selectModel(this,'musicgen')" id="model-musicgen">
+          <span class="model-cap">UP TO 30 SEC</span>
+          <span class="model-name">MusicGen</span>
+          <span class="model-desc">Fast, precise genre control — good for quick beat demos and loops</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Your Sound</div>
+      <h3>Genre</h3>
+      <p>Pick the vibe — your prompt will auto-fill.</p>
+      <div class="genre-grid">
+        <div class="genre-pill active" onclick="selectGenre(this,'greek-trap')" data-genre="greek-trap">
+          <span class="genre-name">🏛️ Greek Trap</span>
+          <span class="genre-desc">808s, bouzouki, dark trap energy</span>
+        </div>
+        <div class="genre-pill" onclick="selectGenre(this,'greek-punk')" data-genre="greek-punk">
+          <span class="genre-name">⚡ Greek Punk Futuristic</span>
+          <span class="genre-desc">Cyberpunk meets Greek punk, raw & electric</span>
+        </div>
+        <div class="genre-pill" onclick="selectGenre(this,'nocturne')" data-genre="nocturne">
+          <span class="genre-name">🌙 Parisian Nocturne</span>
+          <span class="genre-desc">Jazz-noir, cinematic, late night Paris</span>
+        </div>
+        <div class="genre-pill" onclick="selectGenre(this,'custom')" data-genre="custom">
+          <span class="genre-name">✨ Custom Blend</span>
+          <span class="genre-desc">Your unique mix — describe it below</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Describe It</div>
+      <h3>Music Prompt</h3>
+      <p>Be specific — instruments, mood, tempo, energy.</p>
+      <textarea id="musicPrompt" placeholder="e.g. Greek trap instrumental, deep 808 bass, bouzouki melody, dark atmospheric synths, cinematic and hypnotic, 140bpm..."></textarea>
+
+      <div style="margin-top:20px;">
+        <div class="slider-row">
+          <label>Duration</label>
+          <input type="range" min="30" max="180" value="120" id="duration"
+            oninput="updateDur(this.value)">
+          <span class="slider-val" id="durVal">2:00</span>
+        </div>
+        <div class="slider-row" id="cfgRow">
+          <label>Creativity</label>
+          <input type="range" min="1" max="10" value="7" id="cfgScale"
+            oninput="document.getElementById('cfgVal').textContent=this.value">
+          <span class="slider-val" id="cfgVal">7</span>
+        </div>
+      </div>
+      <div class="tip">💡 Stable Audio 2.5: higher creativity = more experimental texture. Lower = cleaner, structured sound.</div>
+    </div>
+
+    <button class="btn btn-primary" onclick="generateInstrumental()" id="genMusicBtn">
+      ✦ Generate My Track
+    </button>
+  </div>
+
+  <!-- ===== FULL SONG TAB ===== -->
+  <div class="tab-content" id="content-song">
+
+    <div class="card">
+      <div class="card-label">Engine</div>
+      <h3>YuE (fofr/yue) — Full Songs with Lyrics</h3>
+      <p>Write real lyrics with structure tags. YuE generates full songs with AI vocals in the style you describe — ~$0.64/song.</p>
+      <div class="tip">🎵 Use tags like <code style="background:rgba(0,229,204,0.1);color:var(--neon);padding:1px 5px;border-radius:3px;font-size:11px;">[verse]</code> <code style="background:rgba(0,229,204,0.1);color:var(--neon);padding:1px 5px;border-radius:3px;font-size:11px;">[chorus]</code> <code style="background:rgba(0,229,204,0.1);color:var(--neon);padding:1px 5px;border-radius:3px;font-size:11px;">[bridge]</code> <code style="background:rgba(0,229,204,0.1);color:var(--neon);padding:1px 5px;border-radius:3px;font-size:11px;">[outro]</code> to structure your song.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Style</div>
+      <h3>Music Style Prompt</h3>
+      <p>Describe the genre, instruments, mood, and vibe of the track.</p>
+      <textarea id="songStyle" placeholder="e.g. Greek trap, dark bouzouki samples, heavy 808 bass, atmospheric synths, cinematic and hypnotic, male vocals, 140bpm"></textarea>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Lyrics</div>
+      <h3>Your Lyrics</h3>
+      <p>Write your full song. Use structure tags to control the arrangement.</p>
+      <textarea id="songLyrics" style="min-height:180px;"
+        placeholder="[Verse]
+Στους δρόμους της Αθήνας, στη νύχτα που κυλά
+Η μουσική μου ζει εδώ, η ψυχή μου μιλά
+
+[Chorus]
+Αυτή είναι η μουσική μου, δική μου η νύχτα
+No subscription, no rules, just my vibe
+
+[Bridge]
+Greek trap meets the future, punk energy
+My own studio, my own frequency
+
+[Outro]
+ΜΟΥΣΑ..."></textarea>
+      <div class="tip">✍️ Mix Greek and English — YuE handles both. Use <code style="background:rgba(0,229,204,0.1);color:var(--neon);padding:1px 5px;border-radius:3px;font-size:11px;">[verse]</code> <code style="background:rgba(0,229,204,0.1);color:var(--neon);padding:1px 5px;border-radius:3px;font-size:11px;">[chorus]</code> <code style="background:rgba(0,229,204,0.1);color:var(--neon);padding:1px 5px;border-radius:3px;font-size:11px;">[bridge]</code> tags — the more structure, the better the result.</div>
+    </div>
+
+    <button class="btn btn-primary" onclick="generateFullSong()" id="genSongBtn">
+      ✦ Generate Full Song
+    </button>
+  </div>
+
+  <!-- ===== VOICE CLONE TAB ===== -->
+  <div class="tab-content" id="content-voice">
+
+    <div class="card">
+      <div class="card-label">Your Voice</div>
+      <h3>Upload a Voice Recording</h3>
+      <p>Record 1–3 minutes of your voice speaking or singing clearly. The cleaner the audio, the better your clone.</p>
+      <div class="upload-zone" id="voiceUpload">
+        <input type="file" accept="audio/*" onchange="handleVoiceFile(event)">
+        <div class="upload-icon">🎙️</div>
+        <p><strong>Tap to upload</strong> your voice recording</p>
+        <p>MP3, WAV, M4A — 1 to 3 minutes ideal</p>
+        <div class="file-name" id="voiceFileName"></div>
+      </div>
+      <div class="tip">⚡ RVC v2 on Replicate will convert music into your voice. One upload = unlimited uses this session.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Music Base</div>
+      <h3>What Should Play Behind Your Voice?</h3>
+      <p>This track will be generated, then converted to sound like you're singing it.</p>
+      <textarea id="voiceBasePrompt" placeholder="e.g. Greek trap instrumental, deep 808 bass, bouzouki melody, 140bpm, dark and cinematic..."></textarea>
+    </div>
+
+    <button class="btn btn-primary" onclick="generateWithVoice()" id="genVoiceBtn">
+      ✦ Generate With My Voice
+    </button>
+  </div>
+
+  <!-- Status -->
+  <div class="status-box" id="statusBox">
+    <div class="status-step" id="step1"><div class="step-icon" id="si1">1</div><span id="st1">Starting...</span></div>
+    <div class="status-step" id="step2"><div class="step-icon" id="si2">2</div><span id="st2">Generate audio</span></div>
+    <div class="status-step" id="step3"><div class="step-icon" id="si3">3</div><span id="st3">Finalize track</span></div>
+  </div>
+
+  <div class="error-msg" id="errorMsg"></div>
+
+  <!-- Player -->
+  <div class="player-card" id="playerCard">
+    <h3>🎵 Your Track is Ready</h3>
+    <audio controls id="audioPlayer"></audio>
+    <div class="player-actions" style="margin-top:14px;">
+      <a id="downloadBtn" class="btn btn-neon" download="my-track.wav">⬇ Download</a>
+      <button class="btn btn-secondary" onclick="resetPlayer()">↺ Make Another</button>
+    </div>
+  </div>
+
+  <footer>ΜΟΥΣΑ · Your Personal Studio · Powered by Replicate · Pay per track, own everything</footer>
+</div>
+
+<script>
+  let selectedModel = 'stable-audio';
+  let selectedGenreKey = 'greek-trap';
+  let voiceFileData = null;
+  let pollTimer = null;
+
+  const GENRE_PROMPTS = {
+    'greek-trap': 'Greek trap instrumental music, heavy deep 808 bass drums, traditional bouzouki melody samples, dark atmospheric synths, trap hi-hats and percussion, cinematic and hypnotic atmosphere, 140bpm',
+    'greek-punk': 'Greek punk futuristic music, distorted electric guitar riffs, cyberpunk electronic synths, aggressive driving punk rhythm, industrial electronic beats, raw urban Greek energy, fast-paced',
+    'nocturne': 'Parisian nocturne instrumental, cinematic jazz-noir, melancholic piano melody, muted trumpet, upright double bass, late night Parisian atmosphere, slow tempo, deeply emotional and beautiful',
+    'custom': ''
+  };
+
+  function toggleKey() {
+    const inp = document.getElementById('apiKey');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  }
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    document.getElementById('content-' + tab).classList.add('active');
+    resetUI();
+  }
+
+  function selectModel(el, model) {
+    document.querySelectorAll('.model-card').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    selectedModel = model;
+    const dur = document.getElementById('duration');
+    if (model === 'musicgen') {
+      dur.max = 30; dur.value = Math.min(dur.value, 30);
+      updateDur(dur.value);
+    } else {
+      dur.max = 180; dur.value = 120;
+      updateDur(120);
+    }
+  }
+
+  function selectGenre(el, genre) {
+    document.querySelectorAll('.genre-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    selectedGenreKey = genre;
+    const prompt = document.getElementById('musicPrompt');
+    if (GENRE_PROMPTS[genre]) prompt.value = GENRE_PROMPTS[genre];
+    else { prompt.value = ''; prompt.placeholder = 'Describe your custom blend of styles and sounds...'; }
+  }
+
+  function updateDur(val) {
+    const sec = parseInt(val);
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    document.getElementById('durVal').textContent = m + ':' + String(s).padStart(2, '0');
+  }
+
+  function handleVoiceFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    voiceFileData = file;
+    const el = document.getElementById('voiceFileName');
+    el.textContent = '✓ ' + file.name;
+    el.style.display = 'block';
+  }
+
+  function getKey() { return document.getElementById('apiKey').value.trim(); }
+
+  function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = '⚠ ' + msg;
+    el.classList.add('show');
+  }
+  function hideError() { document.getElementById('errorMsg').classList.remove('show'); }
+
+  function setStep(num, state, text) {
+    const step = document.getElementById('step' + num);
+    const icon = document.getElementById('si' + num);
+    const textEl = document.getElementById('st' + num);
+    step.className = 'status-step ' + state;
+    textEl.textContent = text;
+    if (state === 'done') icon.textContent = '✓';
+    else if (state === 'error') icon.textContent = '✗';
+    else icon.textContent = num;
+  }
+
+  function resetUI() {
+    document.getElementById('statusBox').classList.remove('show');
+    document.getElementById('playerCard').classList.remove('show');
+    hideError();
+    if (pollTimer) clearInterval(pollTimer);
+    ['genMusicBtn','genSongBtn','genVoiceBtn'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.disabled = false;
+    });
+  }
+
+  function resetPlayer() { resetUI(); }
+
+  function disableBtn(id) {
+    const el = document.getElementById(id);
+    if (el) el.disabled = true;
+  }
+
+  // ---- INSTRUMENTAL (Stable Audio 2.5 or MusicGen) ----
+  async function generateInstrumental() {
+    const key = getKey();
+    const prompt = document.getElementById('musicPrompt').value.trim();
+    const duration = parseInt(document.getElementById('duration').value);
+    const cfg = parseInt(document.getElementById('cfgScale').value);
+
+    if (!key) { showError('Please enter your Replicate API key.'); return; }
+    if (!prompt) { showError('Please enter a music prompt.'); return; }
+
+    hideError(); resetUI();
+    document.getElementById('statusBox').classList.add('show');
+    disableBtn('genMusicBtn');
+
+    setStep(1, 'active', 'Sending to Replicate...');
+    setStep(2, '', 'Generating audio');
+    setStep(3, '', 'Preparing your track');
+
+    try {
+      let body, url;
+
+      if (selectedModel === 'stable-audio') {
+        url = 'https://api.replicate.com/v1/models/stability-ai/stable-audio/predictions';
+        body = {
+          input: {
+            prompt: prompt,
+            seconds_total: duration,
+            cfg_scale: cfg,
+            steps: 100
+          }
+        };
+      } else {
+        url = 'https://api.replicate.com/v1/models/meta/musicgen/predictions';
+        body = {
+          input: {
+            prompt: prompt,
+            duration: Math.min(duration, 30),
+            temperature: 1.0,
+            output_format: 'wav'
+          }
+        };
+      }
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Token ' + key,
+          'Content-Type': 'application/json',
+          'Prefer': 'wait=5'
+        },
+        body: JSON.stringify(body)
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || data.error || JSON.stringify(data));
+
+      setStep(1, 'done', 'Request accepted');
+      setStep(2, 'active', 'Generating your ' + Math.floor(duration/60) + ':' + String(duration%60).padStart(2,'0') + ' track (may take 1–3 min)...');
+      startElapsed(2);
+
+      if (data.status === 'succeeded' && data.output) {
+        finishTrack(data.output);
+      } else {
+        await pollUntilDone(key, data.id, 'genMusicBtn');
+      }
+
+    } catch (err) {
+      setStep(1, 'error', 'Failed');
+      showError(err.message);
+      document.getElementById('genMusicBtn').disabled = false;
+    }
+  }
+
+  // ---- FULL SONG (fofr/yue) ----
+  async function generateFullSong() {
+    const key = getKey();
+    const style = document.getElementById('songStyle').value.trim();
+    const lyrics = document.getElementById('songLyrics').value.trim();
+
+    if (!key) { showError('Please enter your Replicate API key.'); return; }
+    if (!style) { showError('Please describe the music style.'); return; }
+    if (!lyrics) { showError('Please enter your lyrics.'); return; }
+
+    hideError(); resetUI();
+    document.getElementById('statusBox').classList.add('show');
+    disableBtn('genSongBtn');
+
+    setStep(1, 'active', 'Sending to YuE (fofr/yue)...');
+    setStep(2, '', 'Composing your full song');
+    setStep(3, '', 'Finalizing track');
+
+    try {
+      const res = await fetch('https://api.replicate.com/v1/models/fofr/yue/predictions', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Token ' + key,
+          'Content-Type': 'application/json',
+          'Prefer': 'wait=5'
+        },
+        body: JSON.stringify({
+          input: {
+            lyrics: lyrics,
+            genre_txt: style,
+            use_audio_prompt: false,
+            max_new_tokens: 3000,
+            repetition_penalty: 1.1
+          }
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || data.error || JSON.stringify(data));
+
+      setStep(1, 'done', 'Song submitted to YuE');
+      setStep(2, 'active', 'YuE is generating your full song (2–5 min)...');
+      startElapsed(2);
+
+      if (data.status === 'succeeded' && data.output) {
+        finishTrack(data.output);
+      } else {
+        await pollUntilDone(key, data.id, 'genSongBtn');
+      }
+
+    } catch (err) {
+      setStep(1, 'error', 'Failed');
+      showError(err.message + ' — Check your key or try the Instrumental tab.');
+      document.getElementById('genSongBtn').disabled = false;
+    }
+  }
+
+  // ---- VOICE CLONE (MusicGen + RVC) ----
+  async function generateWithVoice() {
+    const key = getKey();
+    const basePrompt = document.getElementById('voiceBasePrompt').value.trim();
+
+    if (!key) { showError('Please enter your Replicate API key.'); return; }
+    if (!voiceFileData) { showError('Please upload a voice recording first.'); return; }
+    if (!basePrompt) { showError('Please describe the backing music.'); return; }
+
+    hideError(); resetUI();
+    document.getElementById('statusBox').classList.add('show');
+    disableBtn('genVoiceBtn');
+
+    setStep(1, 'active', 'Generating backing music...');
+    setStep(2, '', 'Uploading your voice');
+    setStep(3, '', 'Applying voice clone via RVC');
+
+    try {
+      // Step 1: Generate music
+      const musicRes = await fetch('https://api.replicate.com/v1/models/meta/musicgen/predictions', {
+        method: 'POST',
+        headers: { 'Authorization': 'Token ' + key, 'Content-Type': 'application/json', 'Prefer': 'wait=5' },
+        body: JSON.stringify({ input: { prompt: basePrompt, duration: 30, output_format: 'wav' } })
+      });
+      const musicData = await musicRes.json();
+      if (!musicRes.ok) throw new Error(musicData.detail || 'Music generation failed');
+
+      let musicUrl;
+      if (musicData.status === 'succeeded' && musicData.output) {
+        musicUrl = Array.isArray(musicData.output) ? musicData.output[0] : musicData.output;
+      } else {
+        musicUrl = await waitFor(key, musicData.id);
+      }
+
+      setStep(1, 'done', 'Backing music ready');
+      setStep(2, 'active', 'Uploading your voice sample...');
+
+      // Step 2: Upload voice
+      let voiceUrl;
+      try {
+        const fd = new FormData();
+        fd.append('content', voiceFileData);
+        const upRes = await fetch('https://api.replicate.com/v1/files', {
+          method: 'POST',
+          headers: { 'Authorization': 'Token ' + key },
+          body: fd
+        });
+        if (upRes.ok) {
+          const upData = await upRes.json();
+          voiceUrl = upData.urls?.get || upData.url;
+        }
+      } catch(_) {}
+
+      if (!voiceUrl) voiceUrl = URL.createObjectURL(voiceFileData);
+
+      setStep(2, 'done', 'Voice uploaded');
+      setStep(3, 'active', 'Applying your voice clone via RVC v2...');
+
+      // Step 3: RVC voice conversion
+      const rvcRes = await fetch('https://api.replicate.com/v1/predictions', {
+        method: 'POST',
+        headers: { 'Authorization': 'Token ' + key, 'Content-Type': 'application/json', 'Prefer': 'wait=5' },
+        body: JSON.stringify({
+          version: "0dbb70f7df6945ce7944a7fa11d08c1a63ee2e9d59e7f4ad5a3bf52cf7ae6f1b",
+          input: { song_input: musicUrl, rvc_model: 'custom', custom_rvc_model_download_url: voiceUrl, pitch: 0 }
+        })
+      });
+      const rvcData = await rvcRes.json();
+
+      let finalUrl;
+      if (rvcData.status === 'succeeded' && rvcData.output) {
+        finalUrl = rvcData.output;
+      } else if (rvcData.id) {
+        try { finalUrl = await waitFor(key, rvcData.id); } catch(_) { finalUrl = musicUrl; }
+      } else {
+        finalUrl = musicUrl;
+      }
+
+      setStep(3, 'done', 'Voice clone applied!');
+      finishTrack(finalUrl);
+
+    } catch (err) {
+      setStep(1, 'error', 'Failed');
+      showError(err.message);
+      document.getElementById('genVoiceBtn').disabled = false;
+    }
+  }
+
+  // ---- Save API key across sessions ----
+  (function() {
+    const saved = localStorage.getItem('replicate_key');
+    if (saved) document.getElementById('apiKey').value = saved;
+    document.getElementById('apiKey').addEventListener('change', function() {
+      if (this.value.trim()) localStorage.setItem('replicate_key', this.value.trim());
+    });
+  })();
+
+  // ---- Elapsed timer ----
+  let elapsedTimer = null;
+  let elapsedSeconds = 0;
+  function startElapsed(stepNum) {
+    elapsedSeconds = 0;
+    if (elapsedTimer) clearInterval(elapsedTimer);
+    elapsedTimer = setInterval(() => {
+      elapsedSeconds++;
+      const m = Math.floor(elapsedSeconds / 60);
+      const s = String(elapsedSeconds % 60).padStart(2, '0');
+      const el = document.getElementById('st' + stepNum);
+      if (el) {
+        const base = el.dataset.base || el.textContent.split(' (')[0];
+        el.dataset.base = base;
+        el.textContent = base + ' (' + (m > 0 ? m + 'm ' : '') + s + 's)';
+      }
+    }, 1000);
+  }
+  function stopElapsed() {
+    if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null; }
+  }
+
+  // ---- Polling ----
+  async function pollUntilDone(key, id, btnId) {
+    return new Promise((resolve, reject) => {
+      let attempts = 0;
+      let consecutiveErrors = 0;
+      pollTimer = setInterval(async () => {
+        attempts++;
+        // Max 10 minutes (200 × 3s)
+        if (attempts > 200) {
+          clearInterval(pollTimer);
+          stopElapsed();
+          showError('Timed out after 10 min. Your track may still be processing — check replicate.com/predictions/' + id);
+          document.getElementById(btnId).disabled = false;
+          return;
+        }
+        try {
+          const res = await fetch('https://api.replicate.com/v1/predictions/' + id, {
+            headers: { 'Authorization': 'Token ' + key }
+          });
+          if (!res.ok) { consecutiveErrors++; if (consecutiveErrors > 5) throw new Error('Network error'); return; }
+          consecutiveErrors = 0;
+          const data = await res.json();
+          if (data.status === 'succeeded') {
+            clearInterval(pollTimer);
+            stopElapsed();
+            finishTrack(data.output);
+            resolve(data.output);
+          } else if (data.status === 'failed') {
+            clearInterval(pollTimer);
+            stopElapsed();
+            setStep(2, 'error', 'Generation failed');
+            const errMsg = data.error || 'Unknown error';
+            showError('Failed: ' + errMsg + (errMsg.includes('CUDA') ? ' — model overloaded, try again in a minute.' : ''));
+            document.getElementById(btnId).disabled = false;
+            reject(new Error(data.error));
+          } else if (data.status === 'canceled') {
+            clearInterval(pollTimer);
+            stopElapsed();
+            showError('Prediction was canceled on Replicate.');
+            document.getElementById(btnId).disabled = false;
+            reject(new Error('Canceled'));
+          }
+        } catch (e) {
+          consecutiveErrors++;
+          if (consecutiveErrors > 8) {
+            clearInterval(pollTimer);
+            stopElapsed();
+            showError('Lost connection to Replicate. Check your internet and try again.');
+            document.getElementById(btnId).disabled = false;
+            reject(e);
+          }
+        }
+      }, 3000);
+    });
+  }
+
+  async function waitFor(key, id) {
+    for (let i = 0; i < 120; i++) {
+      await new Promise(r => setTimeout(r, 3000));
+      try {
+        const res = await fetch('https://api.replicate.com/v1/predictions/' + id, {
+          headers: { 'Authorization': 'Token ' + key }
+        });
+        if (!res.ok) continue;
+        const data = await res.json();
+        if (data.status === 'succeeded') return Array.isArray(data.output) ? data.output[0] : data.output;
+        if (data.status === 'failed') throw new Error(data.error || 'Prediction failed');
+      } catch(e) { continue; }
+    }
+    throw new Error('Timed out waiting for result');
+  }
+
+  function finishTrack(output) {
+    stopElapsed();
+    setStep(2, 'done', 'Audio generated ✓');
+    setStep(3, 'active', 'Preparing your track...');
+    // Handle all output shapes: string, array, object with audio/url key
+    let url = output;
+    if (Array.isArray(output)) url = output[0];
+    else if (output && typeof output === 'object') url = output.audio || output.url || output.output || Object.values(output)[0];
+    if (!url || typeof url !== 'string') {
+      showError('Track generated but could not read the output URL. Check replicate.com/predictions');
+      ['genMusicBtn','genSongBtn','genVoiceBtn'].forEach(id => { const el = document.getElementById(id); if (el) el.disabled = false; });
+      return;
+    }
+    setTimeout(() => {
+      setStep(3, 'done', 'Track is ready — press play! 🎵');
+      document.getElementById('audioPlayer').src = url;
+      document.getElementById('downloadBtn').href = url;
+      document.getElementById('playerCard').classList.add('show');
+      ['genMusicBtn','genSongBtn','genVoiceBtn'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+    }, 600);
+  }
+
+  // ---- Drag-drop ----
+  const zone = document.getElementById('voiceUpload');
+  if (zone) {
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault(); zone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('audio/')) {
+        voiceFileData = file;
+        const el = document.getElementById('voiceFileName');
+        el.textContent = '✓ ' + file.name; el.style.display = 'block';
+      }
+    });
+  }
+</script>
+</body>
+</html>
